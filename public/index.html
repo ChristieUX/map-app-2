@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UK Trip Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; width: 100%; }
+    #addBtn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #addBtn:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <button id="addBtn">+ Add Location</button>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    const map = L.map('map').setView([54.5, -3.5], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const socket = io();
+    const markers = [];
+
+    function addMarker(p) {
+      const marker = L.marker([p.lat, p.lon])
+        .addTo(map)
+        .bindTooltip(p.name, { direction: 'top' });
+      markers.push(marker);
+    }
+
+    fetch('/api/pins').then(r => r.json()).then(pins => pins.forEach(addMarker));
+    socket.on('newPin', p => addMarker(p));
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+      const name = prompt("Enter your name:");
+      if (!name) return;
+      const place = prompt("Enter your location (e.g. Manchester, UK):");
+      if (!place) return;
+
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`);
+      const data = await res.json();
+      if (!data.length) return alert("Location not found");
+
+      const lat = parseFloat(data[0].lat);
+      const lon = parseFloat(data[0].lon);
+
+      await fetch('/api/pins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, lat, lon })
+      });
+    });
+  </script>
+</body>
+</html>

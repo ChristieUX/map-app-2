@@ -1,0 +1,14 @@
+{
+  "name": "trip-map",
+  "version": "1.0.0",
+  "description": "Interactive UK trip map with shared live pins",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.5"
+  }
+}
