@@ -15,7 +15,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 8080;
 
 // IMPORTANT: set this in Render (or paste it here temporarily)
-const BLOB_URL = process.env.BLOB_URL || "https://jsonblob.com/1428748111349735424";
+const BLOB_URL = process.env.BLOB_URL || "http://jsonblob.com/1428758955286519808";
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
